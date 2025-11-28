@@ -37,11 +37,54 @@
       </q-card-section>
     </q-card>
   </q-page>
+
+  <q-page class="flex flex-center">
+    <div id="map" style="width: 100%; height: 600px;"></div>
+  </q-page>
+
 </template>
 
 
 <script setup>
-const gitSteps = [
+import { onMounted } from 'vue';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css'; // นำเข้า CSS ของ Leaflet
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+  let DefaultIcon = L.icon({
+      iconUrl: icon,
+      shadowUrl: iconShadow,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+  });
+  L.Marker.prototype.options.icon = DefaultIcon;
+
+  onMounted(() => {
+    // 1. ระบุพิกัด (ตัวอย่าง: อนุสาวรีย์ชัยฯ หรือเปลี่ยนเป็นพิกัดที่คุณต้องการ)
+    const lat = 18.8946321; 
+    const lng = 99.0108616;
+
+    // 2. สร้างแผนที่
+    const map = L.map('map').setView([lat, lng], 10);
+
+    // ใส่แผนที่พื้นหลัง (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. ใส่ Marker และ Label (ชื่อ สกุล รหัส)
+    const myName = "นายณัฐภูมิ หลู่จิ่ง"; // ใส่ชื่อคุณ
+    const myID = "6604101329";     // ใส่รหัสนักศึกษาคุณ
+
+    L.marker([lat, lng])
+      .addTo(map)
+      .bindPopup(`<b>ตำแหน่งของฉัน</b><br>ชื่อ: ${myName}<br>รหัส: ${myID}`)
+      .openPopup();
+  });
+
+
+  const gitSteps = [
   {
     title: 'แก้โค้ด Quasar ใน src/',
     detail: 'เพิ่มหน้า / component ใหม่ เช่น IndexPage.vue, Layout ต่าง ๆ',
@@ -83,4 +126,5 @@ const dockerItems = [
     detail: 'เชื่อม container ระหว่างกัน เช่น frontend คุยกับ backend ผ่าน network ของ Docker',
   },
 ]
+
 </script>
