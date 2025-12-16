@@ -5,18 +5,17 @@ WORKDIR /app
 # 1. Copy package*.json และ .npmrc ก่อนเพื่อใช้ Cache layer
 COPY package*.json ./
 
-# 2. Copy ไฟล์โปรเจกต์ทั้งหมด (ยกเว้นที่อยู่ใน .dockerignore)
-#    ต้องอยู่ตรงนี้เพื่อให้สคริปต์ของ Quasar รันได้สมบูรณ์ในขั้นตอน npm ci
+# 2. Install dependencies (ใช้ --ignore-scripts เพื่อข้าม quasar prepare ก่อน เพราะยังไม่มีไฟล์โปรเจกต์)
+RUN npm ci --ignore-scripts
+
+# 3. Copy ไฟล์โปรเจกต์ทั้งหมด
 COPY . .
 
-# 3. ติดตั้ง dependencies และรันสคริปต์ prepare (ที่เคย error)
-#    เราใช้ npm install แทน npm ci เพื่อความยืดหยุ่น ถ้ายัง error ค่อยเปลี่ยนกลับเป็น npm ci
-RUN npm install --legacy-peer-deps
+# 4. Run quasar prepare (รันตอนนี้เพราะมีไฟล์โปรเจกต์แล้ว)
+RUN npx quasar prepare
 
-# 4. Build Quasar SPA (ผลลัพธ์อยู่ที่ /app/dist/spa)
+# 5. Build Quasar SPA (ผลลัพธ์อยู่ที่ /app/dist/spa)
 RUN npx quasar build -m spa
-# 5. ติดตั้ง Leaflet และ @types/leaflet
-RUN npm install leaflet @types/leaflet
 
 # Stage 2: Production (Serve with Nginx)
 FROM nginx:1.27-alpine
